@@ -1,0 +1,80 @@
+{
+  "builder_name": "json",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "cuad",
+  "dataset_size": 38281421,
+  "description": "",
+  "download_size": 40128638,
+  "features": {
+    "version": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "data": {
+      "feature": {
+        "title": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "paragraphs": {
+          "feature": {
+            "qas": {
+              "feature": {
+                "answers": {
+                  "feature": {
+                    "text": {
+                      "dtype": "string",
+                      "_type": "Value"
+                    },
+                    "answer_start": {
+                      "dtype": "int64",
+                      "_type": "Value"
+                    }
+                  },
+                  "_type": "List"
+                },
+                "id": {
+                  "dtype": "string",
+                  "_type": "Value"
+                },
+                "question": {
+                  "dtype": "string",
+                  "_type": "Value"
+                },
+                "is_impossible": {
+                  "dtype": "bool",
+                  "_type": "Value"
+                }
+              },
+              "_type": "List"
+            },
+            "context": {
+              "dtype": "string",
+              "_type": "Value"
+            }
+          },
+          "_type": "List"
+        }
+      },
+      "_type": "List"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 78410059,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 38281421,
+      "num_examples": 1,
+      "dataset_name": "cuad"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

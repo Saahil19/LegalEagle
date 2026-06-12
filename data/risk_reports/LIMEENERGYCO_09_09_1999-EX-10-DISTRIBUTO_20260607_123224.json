@@ -1,0 +1,25 @@
+{
+  "contract": "LIMEENERGYCO_09_09_1999-EX-10-DISTRIBUTOR_AGREEMENT",
+  "entities": {
+    "Termination": [
+      "termination on 30 days notice"
+    ],
+    "Governing_Law": [
+      "State of Delaware"
+    ]
+  },
+  "risk_report": {
+    "Termination": {
+      "score": 5,
+      "reasoning": "<one sentence explanation>",
+      "text": "termination on 30 days notice",
+      "rag_used": "[LIMEENERGYCO_09_09_1999-EX-10-DISTRIBUTO]\n4.2      Termination  for  Cause.   Either  party  may  t..."
+    },
+    "Governing_Law": {
+      "score": 5,
+      "reasoning": "<one sentence explanation>",
+      "text": "State of Delaware",
+      "rag_used": "[LIMEENERGYCO_09_09_1999-EX-10-DISTRIBUTO]\nEXHIBIT 10.6\n\n                              DISTRIBUTOR A..."
+    }
+  }
+}

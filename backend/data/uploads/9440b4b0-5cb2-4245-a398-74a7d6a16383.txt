@@ -1,0 +1,90 @@
+CONSULTING AGREEMENT
+
+This Consulting Agreement ("Agreement") is entered into as of January 15, 2024,
+by and between TechVentures Global LLC, a Delaware corporation ("Company"),
+and Alex Morgan, an individual residing in California ("Consultant").
+
+1. SERVICES
+Consultant agrees to provide software development and AI research consulting
+services as directed by Company from time to time. Company may unilaterally
+modify the scope of services without prior notice to Consultant.
+
+2. TERM AND TERMINATION
+This Agreement shall commence on January 15, 2024. Company may terminate this
+Agreement immediately, at any time, without cause, without written notice, and
+without any obligation to pay for work already completed but not yet invoiced.
+Consultant may only terminate this Agreement upon providing 180 days prior
+written notice to Company.
+
+3. COMPENSATION
+Consultant shall be paid $50 per hour for services rendered. Company reserves
+the right to reduce this rate at any time with 7 days notice. Company shall
+withhold final payment of any amounts owed until all deliverables have been
+accepted in writing by Company at its sole and absolute discretion.
+
+4. INTELLECTUAL PROPERTY OWNERSHIP
+All work product, inventions, discoveries, developments, improvements,
+software, code, documentation, designs, and any other materials created by
+Consultant during or related to this engagement, whether during business hours
+or personal time, whether using Company resources or Consultant's own resources,
+shall be the sole and exclusive property of Company. Consultant hereby
+irrevocably assigns all rights, title, and interest in all such work product to
+Company. This assignment extends to all prior inventions that Consultant has
+created in the five years prior to signing this Agreement that are related to
+Company's business in any way.
+
+5. INDEMNIFICATION
+Consultant shall indemnify, defend, and hold harmless Company, its officers,
+directors, employees, agents, successors, and assigns from and against any and
+all claims, damages, losses, liabilities, costs, and expenses (including
+reasonable attorney's fees) arising out of or related to: (a) Consultant's
+performance of services; (b) any breach of this Agreement by Consultant;
+(c) any third-party claims related to Consultant's work product; or (d) any
+act or omission by Consultant. Company shall have no obligation to indemnify
+Consultant for any reason whatsoever.
+
+6. CONFIDENTIALITY
+Consultant agrees to keep strictly confidential all information related to
+Company's business, technology, customers, financials, and strategy. This
+confidentiality obligation shall remain in effect for a period of ten (10) years
+after the termination of this Agreement. Consultant may not disclose any
+information to any third party under any circumstances, including in legal
+proceedings, without express written consent from Company's CEO.
+
+7. NON-COMPETE AND NON-SOLICITATION
+For a period of five (5) years following the termination of this Agreement,
+Consultant shall not, directly or indirectly, anywhere in the world:
+(a) engage in, own, manage, operate, consult for, or be employed by any
+business that competes with Company or any of its affiliates in any way;
+(b) solicit, hire, or engage any employee, contractor, or customer of Company;
+(c) develop any product or service that could potentially compete with any
+current or future product of Company.
+
+8. GOVERNING LAW AND DISPUTE RESOLUTION
+This Agreement shall be governed exclusively by the laws of the Cayman Islands,
+without regard to conflict of law principles. All disputes shall be resolved
+by binding arbitration in the Cayman Islands. Consultant waives any right to
+bring a class action or join any class action against Company. Consultant
+further waives the right to a jury trial for any dispute arising under this
+Agreement.
+
+9. LIMITATION OF LIABILITY
+In no event shall Company be liable to Consultant for any damages of any kind,
+including direct, indirect, incidental, consequential, or punitive damages,
+regardless of the cause of action or theory of liability. Company's maximum
+liability to Consultant shall not exceed $100 regardless of the circumstances.
+
+10. MISCELLANEOUS
+This Agreement constitutes the entire agreement between the parties. Company
+may modify this Agreement at any time by posting an updated version online,
+and Consultant's continued performance of services shall constitute acceptance
+of such modifications. If any provision is found unenforceable, the remaining
+provisions shall remain in full force and effect.
+
+IN WITNESS WHEREOF, the parties have executed this Agreement as of the date
+first written above.
+
+TECHVENTURES GLOBAL LLC                ALEX MORGAN
+By: John Smith                         Signature: _______________
+Title: Chief Executive Officer         Date: January 15, 2024
+Date: January 15, 2024

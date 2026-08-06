@@ -24,9 +24,16 @@ from database import init_db, get_db, AnalysisJob, QARecord
 # ── App ────────────────────────────────────────────────────────────────────────
 app = FastAPI(title="LegalEagle API", version="1.0.0")
 
+import os
+
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

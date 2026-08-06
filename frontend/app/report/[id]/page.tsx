@@ -11,7 +11,7 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/report/${id}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/report/${id}`)
       .then(r => r.json())
       .then(d => {
         setData(d);

@@ -25,7 +25,7 @@ export default function Chat({ jobId }: { jobId: string }) {
       // Create a placeholder for AI response
       setMessages(prev => [...prev, { role: 'ai', text: '' }]);
 
-      const url = `http://localhost:8000/ask/stream?job_id=${encodeURIComponent(jobId)}&question=${encodeURIComponent(userQ)}`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/ask/stream?job_id=${encodeURIComponent(jobId)}&question=${encodeURIComponent(userQ)}`;
       const eventSource = new EventSource(url);
 
       eventSource.onmessage = (event) => {

@@ -58,7 +58,7 @@ export default function Home() {
       formData.append("file", file);
 
       // 1. Upload
-      const resUpload = await fetch("http://localhost:8000/upload", {
+      const resUpload = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload`, {
         method: "POST",
         body: formData
       });
@@ -68,7 +68,7 @@ export default function Home() {
 
       // 2. Analyze
       setStatus('analyzing');
-      const resAnalyze = await fetch("http://localhost:8000/analyze", {
+      const resAnalyze = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ job_id: jobId })

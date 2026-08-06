@@ -65,9 +65,13 @@ def _load_models():
         encode_kwargs={"normalize_embeddings": True},
     )
 
-    gen = hf_pipeline("text-generation", model="google/flan-t5-base",
-                      max_new_tokens=256, do_sample=False)
-    _LLM = HuggingFacePipeline(pipeline=gen)
+    # flan-t5 disabled for free-tier deployment (512MB RAM limit on Render).
+    # Risk scoring falls back to pre-calibrated RISK_BASELINE heuristics.
+    # Uncomment the 3 lines below to re-enable LLM-generated reasoning locally.
+    # gen = hf_pipeline("text-generation", model="google/flan-t5-base",
+    #                   max_new_tokens=256, do_sample=False)
+    # _LLM = HuggingFacePipeline(pipeline=gen)
+    _LLM = None  # baseline heuristic scoring active
 
     try:
         import subprocess

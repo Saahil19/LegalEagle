@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // production build — legaleagle.vercel.app
 };
 
 export default nextConfig;

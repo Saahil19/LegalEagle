@@ -26,15 +26,15 @@ app = FastAPI(title="LegalEagle API", version="1.0.0")
 
 import os
 
-ALLOWED_ORIGINS = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:3000,http://127.0.0.1:3000"
-).split(",")
+# Allow all origins for free-tier demo deployment.
+# In production with auth, restrict to specific domains via ALLOWED_ORIGINS env var.
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "*")
+ALLOWED_ORIGINS = _raw_origins.split(",") if _raw_origins != "*" else ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=False,   # must be False when allow_origins=["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )

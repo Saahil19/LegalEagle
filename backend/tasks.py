@@ -3,6 +3,10 @@
 Analysis logic — can be called directly (sync) or via Celery (async).
 Core function _analyze_contract() is a plain Python function.
 Celery task run_analysis() wraps it for async queue usage.
+
+Production note: ML models (BERT NER, sentence-transformers) are not available
+on Render free tier (model files are gitignored; torch not installed).
+The app automatically falls back to keyword-based NER + RISK_BASELINE heuristics.
 """
 import json, re, warnings
 from pathlib import Path
@@ -14,6 +18,7 @@ from database import SessionLocal, AnalysisJob
 
 # ── Lazy-loaded globals (initialised once per process) ────────────────────────
 _MODELS_LOADED = False
+_ML_AVAILABLE  = False   # True only when torch + model files are present
 _NER_TOKENIZER = None
 _NER_MODEL     = None
 _EMBEDDER      = None
@@ -41,55 +46,64 @@ RISK_BASELINE = {
 
 
 def _load_models():
-    global _MODELS_LOADED, _NER_TOKENIZER, _NER_MODEL, _EMBEDDER, _LLM, _QDRANT
+    global _MODELS_LOADED, _ML_AVAILABLE, _NER_TOKENIZER, _NER_MODEL, _EMBEDDER, _LLM, _QDRANT
     if _MODELS_LOADED:
         return
-    import torch
-    from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline as hf_pipeline
-    from langchain_huggingface import HuggingFaceEmbeddings, HuggingFacePipeline
-    from qdrant_client import QdrantClient
-
-    # Resolve model path relative to this file (tasks.py is in backend/)
-    # so the model is one level up: LegalEagle/models/bert-ner-cuad-final
-    MODEL_PATH = (Path(__file__).parent.parent / "models" / "bert-ner-cuad-final").resolve()
-    model_path_str = str(MODEL_PATH)
-
-    _NER_TOKENIZER = AutoTokenizer.from_pretrained(model_path_str)
-    _NER_MODEL = AutoModelForTokenClassification.from_pretrained(
-        model_path_str, ignore_mismatched_sizes=True
-    )
-    _NER_MODEL.eval()
-
-    _EMBEDDER = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2",
-        encode_kwargs={"normalize_embeddings": True},
-    )
-
-    # flan-t5 disabled for free-tier deployment (512MB RAM limit on Render).
-    # Risk scoring falls back to pre-calibrated RISK_BASELINE heuristics.
-    # Uncomment the 3 lines below to re-enable LLM-generated reasoning locally.
-    # gen = hf_pipeline("text-generation", model="google/flan-t5-base",
-    #                   max_new_tokens=256, do_sample=False)
-    # _LLM = HuggingFacePipeline(pipeline=gen)
-    _LLM = None  # baseline heuristic scoring active
 
     try:
-        import subprocess
-        check = subprocess.run(
-            ["docker", "ps", "--filter", "name=qdrant-legal", "--format", "{{.Names}}"],
-            capture_output=True, text=True, timeout=5
+        import torch
+        from transformers import AutoTokenizer, AutoModelForTokenClassification
+        from langchain_huggingface import HuggingFaceEmbeddings
+        from qdrant_client import QdrantClient
+
+        # Resolve model path: LegalEagle/models/bert-ner-cuad-final
+        MODEL_PATH = (Path(__file__).parent.parent / "models" / "bert-ner-cuad-final").resolve()
+        if not MODEL_PATH.exists():
+            raise FileNotFoundError(f"BERT model not found at {MODEL_PATH}. Using keyword fallback.")
+
+        _NER_TOKENIZER = AutoTokenizer.from_pretrained(str(MODEL_PATH))
+        _NER_MODEL = AutoModelForTokenClassification.from_pretrained(
+            str(MODEL_PATH), ignore_mismatched_sizes=True
         )
-        if "qdrant-legal" in check.stdout:
-            _QDRANT = QdrantClient(host="localhost", port=6333)
-        else:
+        _NER_MODEL.eval()
+
+        _EMBEDDER = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            encode_kwargs={"normalize_embeddings": True},
+        )
+
+        # flan-t5 disabled for free-tier deployment (512MB RAM limit on Render).
+        # Uncomment below to re-enable LLM-generated reasoning locally:
+        # from transformers import pipeline as hf_pipeline
+        # from langchain_huggingface import HuggingFacePipeline
+        # gen = hf_pipeline("text-generation", model="google/flan-t5-base", max_new_tokens=256, do_sample=False)
+        # _LLM = HuggingFacePipeline(pipeline=gen)
+        _LLM = None
+
+        try:
+            import subprocess
+            check = subprocess.run(
+                ["docker", "ps", "--filter", "name=qdrant-legal", "--format", "{{.Names}}"],
+                capture_output=True, text=True, timeout=5
+            )
+            _QDRANT = QdrantClient(host="localhost", port=6333) if "qdrant-legal" in check.stdout \
+                      else QdrantClient(":memory:")
+        except Exception:
             _QDRANT = QdrantClient(":memory:")
-    except Exception:
-        _QDRANT = QdrantClient(":memory:")
+
+        _ML_AVAILABLE = True
+        print("[LegalEagle] ML models loaded successfully.")
+
+    except (ImportError, FileNotFoundError, Exception) as e:
+        print(f"[LegalEagle] ML unavailable ({e}). Using keyword-based NER + heuristic scoring.")
+        _ML_AVAILABLE = False
 
     _MODELS_LOADED = True
 
 
 def _run_ner(text: str) -> dict:
+    if not _ML_AVAILABLE or _NER_MODEL is None:
+        return {}   # triggers keyword fallback in analyze_contract_core
     import torch
     enc = _NER_TOKENIZER(
         text, return_tensors="pt", truncation=True,
@@ -127,6 +141,8 @@ def _run_ner(text: str) -> dict:
 
 
 def _rag_search(query: str, k: int = 2) -> list:
+    if not _ML_AVAILABLE or _EMBEDDER is None:
+        return []
     try:
         qvec = _EMBEDDER.embed_query(query)
         res = _QDRANT.query_points(
@@ -141,23 +157,26 @@ def _rag_search(query: str, k: int = 2) -> list:
 
 def _score_clause(clause_type: str, texts: list) -> dict:
     clause_text = "; ".join(texts[:2])[:300]
-    similar = _rag_search(clause_text)
-    ctx = "\n".join(f"- [{r['type']}] {r['text'][:120]}" for r in similar)
-    prompt = (
-        f"You are a legal risk analyst. Score this clause 1-10.\n"
-        f"CLAUSE TYPE: {clause_type}\nTEXT: {clause_text}\n"
-        f"SIMILAR MARKET CLAUSES:\n{ctx}\n"
-        f"1=low risk, 10=high risk. Reply: SCORE: <n> REASONING: <sentence>"
-    )
-    try:
-        resp = _LLM.invoke(prompt)
-        m_s = re.search(r"SCORE:\s*(\d+)", resp, re.I)
-        m_r = re.search(r"REASONING:\s*(.+)", resp, re.I | re.S)
-        score = min(10, max(1, int(m_s.group(1)))) if m_s else RISK_BASELINE.get(clause_type, 5)
-        reason = m_r.group(1).strip()[:200] if m_r else "Baseline heuristic."
-    except Exception:
-        score = RISK_BASELINE.get(clause_type, 5)
-        reason = "Baseline heuristic score applied."
+    similar = _rag_search(clause_text)   # returns [] if ML unavailable
+    score = RISK_BASELINE.get(clause_type, 5)
+    reason = "Domain-calibrated baseline score."
+    # LLM scoring (local only — flan-t5 disabled for prod)
+    if _ML_AVAILABLE and _LLM is not None:
+        ctx = "\n".join(f"- [{r['type']}] {r['text'][:120]}" for r in similar)
+        prompt = (
+            f"You are a legal risk analyst. Score this clause 1-10.\n"
+            f"CLAUSE TYPE: {clause_type}\nTEXT: {clause_text}\n"
+            f"SIMILAR MARKET CLAUSES:\n{ctx}\n"
+            f"1=low risk, 10=high risk. Reply: SCORE: <n> REASONING: <sentence>"
+        )
+        try:
+            resp = _LLM.invoke(prompt)
+            m_s = re.search(r"SCORE:\s*(\d+)", resp, re.I)
+            m_r = re.search(r"REASONING:\s*(.+)", resp, re.I | re.S)
+            score = min(10, max(1, int(m_s.group(1)))) if m_s else score
+            reason = m_r.group(1).strip()[:200] if m_r else reason
+        except Exception:
+            pass
     return {"score": score, "reasoning": reason, "text": clause_text[:150],
             "similar_clauses": similar}
 
